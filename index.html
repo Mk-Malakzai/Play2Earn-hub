@@ -9,7 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <!-- Ad Script Integration -->
-    <script src='//libtl.com/sdk.js' data-zone='10001644' data-sdk='show_10001644'></script>
+    <script src='//libtl.com/sdk.js' data-zone='10008240' data-sdk='show_10008240'></script>
     <style>
         /* Global Styles */
         :root {
@@ -604,12 +604,16 @@
             background-color: var(--card-bg);
             border-bottom: 1px solid var(--border-color);
             padding: 0 16px;
+            display: flex;
+            overflow-x: auto;
         }
 
         .admin-nav-list {
             display: flex;
             list-style: none;
-            overflow-x: auto;
+            margin: 0;
+            padding: 0;
+            width: 100%;
         }
 
         .admin-nav-item {
@@ -617,15 +621,18 @@
             cursor: pointer;
             white-space: nowrap;
             border-bottom: 2px solid transparent;
+            flex-shrink: 0;
         }
 
         .admin-nav-item.active {
             border-bottom-color: var(--primary-color);
             color: var(--primary-color);
+            font-weight: bold;
         }
 
         .admin-content {
             padding: 16px;
+            min-height: calc(100vh - 120px);
         }
 
         .stats-cards {
@@ -659,6 +666,7 @@
             border-radius: 8px;
             overflow: hidden;
             box-shadow: var(--shadow);
+            margin-bottom: 20px;
         }
 
         .table-header {
@@ -671,6 +679,13 @@
 
         .table-container {
             overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .table-container table {
+            width: 100%;
+            min-width: 600px;
         }
 
         .pagination {
@@ -795,35 +810,6 @@
             opacity: 1;
         }
 
-        /* Animation for ad watching */
-        @keyframes countdown {
-            from { width: 100%; }
-            to { width: 0%; }
-        }
-
-        .ad-countdown {
-            height: 4px;
-            background-color: var(--primary-color);
-            width: 100%;
-            animation: countdown 15s linear forwards;
-        }
-
-        .ad-container {
-            text-align: center;
-            padding: 20px;
-        }
-
-        .ad-placeholder {
-            width: 100%;
-            height: 200px;
-            background-color: var(--border-color);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 16px;
-        }
-
         /* Mining Graph Styles */
         .mining-graph {
             display: flex;
@@ -853,6 +839,34 @@
             font-size: 12px;
             text-align: center;
         }
+
+        /* Admin Tab Styles */
+        .admin-tab {
+            display: none;
+        }
+
+        .admin-tab.active {
+            display: block;
+        }
+
+        /* Ad Container Styles */
+        .ad-container {
+            width: 100%;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .ad-unit {
+            width: 100%;
+            min-height: 100px;
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+        }
     </style>
 </head>
 <body>
@@ -876,7 +890,7 @@
             </div>
             <div class="balance-card">
                 <h3>Main Balance</h3>
-                <p class="amount" id="main-balance">0.00 USDT</p>
+                <p class="amount" id="main-balance">0.00 AFN</p>
             </div>
         </div>
 
@@ -899,7 +913,7 @@
                     </div>
                     <div class="stat-card">
                         <h4>Total Income</h4>
-                        <p id="total-income">0.00 USDT</p>
+                        <p id="total-income">0.00 AFN</p>
                     </div>
                 </div>
 
@@ -922,14 +936,22 @@
                         <span>Follow on X</span>
                     </a>
                 </div>
+
+                <!-- Ad Container -->
+                <div class="ad-container">
+                    <div id="monetag-ad-unit" class="ad-unit">
+                        <!-- Monetag ads will load here -->
+                        <p>Advertisement</p>
+                    </div>
+                </div>
             </div>
 
             <!-- Tasks Screen -->
             <div id="tasks-screen" class="tab-pane">
                 <div class="card">
                     <h4 class="mb-3">Earning Wallet</h4>
-                    <p class="mb-2">Current Balance: <strong id="earning-balance">0.00 USDT</strong></p>
-                    <p class="mb-3" id="min-transfer-text">Minimum 10 USDT to transfer</p>
+                    <p class="mb-2">Current Balance: <strong id="earning-balance">0.00 AFN</strong></p>
+                    <p class="mb-3" id="min-transfer-text">Minimum 10 AFN to transfer</p>
                     <button class="btn btn-primary w-100" id="transfer-btn" disabled>Transfer to Main Balance</button>
                 </div>
 
@@ -944,7 +966,7 @@
                             <div class="progress-bar" id="ad-progress-bar" style="width: 0%"></div>
                         </div>
                     </div>
-                    <button class="btn btn-primary w-100" id="watch-ad-btn">Watch Ad (0.05 USDT)</button>
+                    <button class="btn btn-primary w-100" id="watch-ad-btn">Watch Ad (0.05 AFN)</button>
                 </div>
 
                 <div class="card">
@@ -969,12 +991,12 @@
                 <div class="tab-content">
                     <div id="referrers-tab" class="tab-pane active">
                         <div id="referrers-list">
-                            <!-- Top referrers will be populated here -->
+                            <div class="text-center p-3">Loading top referrers...</div>
                         </div>
                     </div>
                     <div id="earners-tab" class="tab-pane">
                         <div id="earners-list">
-                            <!-- Top earners will be populated here -->
+                            <div class="text-center p-3">Loading top earners...</div>
                         </div>
                     </div>
                 </div>
@@ -984,9 +1006,9 @@
             <div id="profile-screen" class="tab-pane">
                 <div class="card">
                     <h4 class="mb-3">Invite Friends & Earn</h4>
-                    <p class="mb-3">Invite your friends and earn 0.50 USDT for each successful referral!</p>
+                    <p class="mb-3">Invite your friends and earn 0.50 AFN for each successful referral!</p>
                     <div class="referral-link">
-                        <input type="text" id="referral-link-input" class="form-control" readonly value="https://t.me/YourBotUsername/SuperAirDrop?startapp=ref_123456">
+                        <input type="text" id="referral-link-input" class="form-control" readonly>
                         <button class="btn btn-primary" id="copy-link-btn">Copy</button>
                     </div>
                 </div>
@@ -1000,7 +1022,7 @@
                 <div class="card">
                     <h4 class="mb-3">Withdrawal History</h4>
                     <div id="withdrawal-history">
-                        <!-- Withdrawal history will be populated here -->
+                        <div class="text-center p-3">No withdrawal history</div>
                     </div>
                 </div>
             </div>
@@ -1071,8 +1093,8 @@
                             <p class="value" id="admin-total-users">0</p>
                         </div>
                         <div class="admin-card">
-                            <h3>Total USDT Earned</h3>
-                            <p class="value" id="admin-total-earned">0 USDT</p>
+                            <h3>Total AFN Earned</h3>
+                            <p class="value" id="admin-total-earned">0 AFN</p>
                         </div>
                         <div class="admin-card">
                             <h3>Pending Withdrawals</h3>
@@ -1100,6 +1122,7 @@
                                     <tr>
                                         <th>User ID</th>
                                         <th>Username</th>
+                                        <th>First Name</th>
                                         <th>Main Balance</th>
                                         <th>Earning Balance</th>
                                         <th>Referrals</th>
@@ -1108,14 +1131,11 @@
                                     </tr>
                                 </thead>
                                 <tbody id="users-table-body">
-                                    <!-- Users will be populated here -->
+                                    <tr>
+                                        <td colspan="8" class="text-center">Loading users...</td>
+                                    </tr>
                                 </tbody>
                             </table>
-                        </div>
-                        <div class="pagination">
-                            <ul class="pagination-list" id="users-pagination">
-                                <!-- Pagination will be populated here -->
-                            </ul>
                         </div>
                     </div>
                 </div>
@@ -1133,7 +1153,7 @@
                             <textarea class="form-control" id="task-description" placeholder="Enter task description"></textarea>
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="task-reward">Reward Amount (USDT)</label>
+                            <label class="form-label" for="task-reward">Reward Amount (AFN)</label>
                             <input type="number" class="form-control" id="task-reward" placeholder="0.00" step="0.01">
                         </div>
                         <div class="form-group">
@@ -1154,11 +1174,14 @@
                                         <th>Title</th>
                                         <th>Description</th>
                                         <th>Reward</th>
+                                        <th>URL</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tasks-table-body">
-                                    <!-- Tasks will be populated here -->
+                                    <tr>
+                                        <td colspan="5" class="text-center">Loading tasks...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1176,7 +1199,9 @@
                                 <thead>
                                     <tr>
                                         <th>Date</th>
+                                        <th>User ID</th>
                                         <th>Username</th>
+                                        <th>First Name</th>
                                         <th>Amount</th>
                                         <th>Wallet Address</th>
                                         <th>Method</th>
@@ -1184,7 +1209,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="withdrawals-table-body">
-                                    <!-- Withdrawals will be populated here -->
+                                    <tr>
+                                        <td colspan="8" class="text-center">Loading withdrawals...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1196,7 +1223,7 @@
                     <div class="form-card">
                         <h3 class="mb-3">App Configuration</h3>
                         <div class="form-group">
-                            <label class="form-label" for="daily-ad-reward">Daily Ad Reward (USDT)</label>
+                            <label class="form-label" for="daily-ad-reward">Daily Ad Reward (AFN)</label>
                             <input type="number" class="form-control" id="daily-ad-reward" placeholder="0.05" step="0.01">
                         </div>
                         <div class="form-group">
@@ -1204,11 +1231,11 @@
                             <input type="number" class="form-control" id="daily-ad-limit" placeholder="20">
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="referral-bonus">Referral Bonus (USDT)</label>
+                            <label class="form-label" for="referral-bonus">Referral Bonus (AFN)</label>
                             <input type="number" class="form-control" id="referral-bonus" placeholder="0.50" step="0.01">
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="min-transfer-amount">Min Transfer Amount (USDT)</label>
+                            <label class="form-label" for="min-transfer-amount">Min Transfer Amount (AFN)</label>
                             <input type="number" class="form-control" id="min-transfer-amount" placeholder="10" step="0.01">
                         </div>
                         <div class="form-group">
@@ -1218,7 +1245,7 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="withdrawal-methods">Withdrawal Methods (JSON)</label>
-                            <textarea class="form-control" id="withdrawal-methods" placeholder='[{"name": "USDT (BEP-20)", "min": 50}, {"name": "USDT (TRC-20)", "min": 50}]' rows="4"></textarea>
+                            <textarea class="form-control" id="withdrawal-methods" placeholder='[{"name": "Bank Transfer", "min": 50}, {"name": "Cash", "min": 50}]' rows="4"></textarea>
                         </div>
                         <button class="btn btn-primary" id="save-config-btn">Save Configuration</button>
                     </div>
@@ -1245,11 +1272,15 @@
                     <input type="text" class="form-control" id="edit-username">
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="edit-main-balance">Main Balance (USDT)</label>
+                    <label class="form-label" for="edit-first-name">First Name</label>
+                    <input type="text" class="form-control" id="edit-first-name">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="edit-main-balance">Main Balance (AFN)</label>
                     <input type="number" class="form-control" id="edit-main-balance" step="0.01">
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="edit-earning-balance">Earning Balance (USDT)</label>
+                    <label class="form-label" for="edit-earning-balance">Earning Balance (AFN)</label>
                     <input type="number" class="form-control" id="edit-earning-balance" step="0.01">
                 </div>
                 <div class="form-group">
@@ -1284,7 +1315,7 @@
                     <input type="text" class="form-control" id="withdrawal-address" placeholder="Enter your wallet address">
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="withdrawal-amount">Amount (USDT)</label>
+                    <label class="form-label" for="withdrawal-amount">Amount (AFN)</label>
                     <input type="number" class="form-control" id="withdrawal-amount" placeholder="0.00" step="0.01">
                 </div>
                 <div id="withdrawal-info" class="mb-3">
@@ -1294,28 +1325,6 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-modal="withdrawal-modal">Cancel</button>
                 <button class="btn btn-primary" id="submit-withdrawal-btn">Submit Request</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Ad Watch Modal -->
-    <div id="ad-modal" class="modal d-none">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5>Watch Ad</h5>
-                <span class="close" data-modal="ad-modal">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="ad-container">
-                    <div class="ad-placeholder" id="ad-display">
-                        <p>Advertisement will appear here</p>
-                    </div>
-                    <p>Please watch the ad for 15 seconds to earn rewards.</p>
-                    <div class="progress mb-3">
-                        <div class="ad-countdown"></div>
-                    </div>
-                    <button class="btn btn-primary" id="claim-ad-reward-btn" disabled>Claim Reward</button>
-                </div>
             </div>
         </div>
     </div>
@@ -1341,7 +1350,6 @@
         let appConfig = null;
         let currentAdminTab = 'dashboard-tab';
         let currentUserScreen = 'home-screen';
-        let adTimer = null;
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
@@ -1356,6 +1364,8 @@
                               window.Telegram.WebApp.initData && 
                               window.Telegram.WebApp.initData !== '';
             
+            console.log('Telegram environment:', isTelegram);
+            
             if (isTelegram) {
                 // Telegram Mini App environment - show user panel
                 document.getElementById('user-panel').classList.remove('d-none');
@@ -1367,6 +1377,8 @@
                 
                 // Get user data from Telegram
                 const tgUser = Telegram.WebApp.initDataUnsafe.user;
+                console.log('Telegram user:', tgUser);
+                
                 if (tgUser) {
                     initializeUser(tgUser);
                 }
@@ -1417,8 +1429,7 @@
             
             // User actions
             document.getElementById('transfer-btn').addEventListener('click', transferToMainBalance);
-            document.getElementById('watch-ad-btn').addEventListener('click', openAdModal);
-            document.getElementById('claim-ad-reward-btn').addEventListener('click', claimAdReward);
+            document.getElementById('watch-ad-btn').addEventListener('click', watchAd);
             document.getElementById('copy-link-btn').addEventListener('click', copyReferralLink);
             document.getElementById('withdraw-btn').addEventListener('click', openWithdrawalModal);
             document.getElementById('submit-withdrawal-btn').addEventListener('click', submitWithdrawal);
@@ -1455,6 +1466,16 @@
                 document.getElementById('user-name').textContent = tgUser.first_name || 'User';
                 document.getElementById('user-username').textContent = `@${tgUser.username || 'user'}`;
                 
+                // Check for referral parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                const refParam = urlParams.get('startapp');
+                let referredBy = null;
+                
+                if (refParam && refParam.startsWith('ref_')) {
+                    referredBy = refParam.replace('ref_', '');
+                    console.log('Referral detected from user:', referredBy);
+                }
+                
                 // Check if user exists in Firestore
                 const userDoc = await db.collection('users').doc(tgUser.id.toString()).get();
                 
@@ -1476,11 +1497,18 @@
                         lastAdWatchTimestamp: null,
                         completedBonusTasks: [],
                         joinDate: firebase.firestore.FieldValue.serverTimestamp(),
-                        dailyEarnings: {}, // Store daily earnings for graph
-                        weeklyEarnings: [0, 0, 0, 0, 0, 0, 0] // Weekly earnings data
+                        dailyEarnings: {},
+                        referredBy: referredBy, // Track who referred this user
+                        hasClaimedReferral: false
                     };
                     
                     await db.collection('users').doc(tgUser.id.toString()).set(currentUser);
+                    
+                    // If this is a referral, update the referrer's count
+                    if (referredBy) {
+                        await handleReferral(referredBy, tgUser.id.toString());
+                    }
+                    
                     updateUserUI();
                 }
                 
@@ -1488,10 +1516,31 @@
                 loadBonusTasks();
                 loadLeaderboard();
                 loadWithdrawalHistory();
-                updateMiningGraph(); // Initialize real graph data
+                updateMiningGraph();
                 
             } catch (error) {
                 console.error('Error initializing user:', error);
+            }
+        }
+
+        // Handle referral logic
+        async function handleReferral(referrerId, newUserId) {
+            try {
+                const referrerDoc = await db.collection('users').doc(referrerId).get();
+                
+                if (referrerDoc.exists) {
+                    const referralBonus = appConfig?.referralBonus || 0.50;
+                    
+                    // Update referrer's data
+                    await db.collection('users').doc(referrerId).update({
+                        referrals: firebase.firestore.FieldValue.increment(1),
+                        mainBalance: firebase.firestore.FieldValue.increment(referralBonus)
+                    });
+                    
+                    console.log(`Referral bonus ${referralBonus} AFN added to user ${referrerId}`);
+                }
+            } catch (error) {
+                console.error('Error handling referral:', error);
             }
         }
 
@@ -1510,7 +1559,7 @@
                 
                 const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
                 const today = new Date();
-                const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+                const currentDay = today.getDay();
                 
                 // Calculate which day is Monday (start of week)
                 const startOfWeek = new Date(today);
@@ -1530,7 +1579,7 @@
                     
                     const barValue = document.createElement('div');
                     barValue.className = 'graph-bar-value';
-                    // Set height based on earnings (max 2.5 USDT = 120px height)
+                    // Set height based on earnings (max 2.5 AFN = 120px height)
                     const height = Math.max(10, (dayEarnings / 2.5) * 120);
                     barValue.style.height = `${height}px`;
                     
@@ -1583,12 +1632,12 @@
         function updateUserUI() {
             if (!currentUser) return;
             
-            document.getElementById('main-balance').textContent = `${currentUser.mainBalance.toFixed(2)} USDT`;
-            document.getElementById('earning-balance').textContent = `${currentUser.earningBalance.toFixed(2)} USDT`;
+            document.getElementById('main-balance').textContent = `${currentUser.mainBalance.toFixed(2)} AFN`;
+            document.getElementById('earning-balance').textContent = `${currentUser.earningBalance.toFixed(2)} AFN`;
             document.getElementById('today-ads').textContent = `${getTodayAdsWatched()}/${appConfig?.dailyAdLimit || 20}`;
             document.getElementById('total-referrals').textContent = currentUser.referrals || 0;
             document.getElementById('total-ads').textContent = currentUser.totalAdsWatched || 0;
-            document.getElementById('total-income').textContent = `${(currentUser.mainBalance + (currentUser.earningBalance || 0)).toFixed(2)} USDT`;
+            document.getElementById('total-income').textContent = `${(currentUser.mainBalance + (currentUser.earningBalance || 0)).toFixed(2)} AFN`;
             
             // Update ad progress
             const todayAds = getTodayAdsWatched();
@@ -1608,7 +1657,7 @@
                 transferBtn.disabled = true;
             }
             
-            document.getElementById('min-transfer-text').textContent = `Minimum ${minTransfer} USDT to transfer`;
+            document.getElementById('min-transfer-text').textContent = `Minimum ${minTransfer} AFN to transfer`;
             
             // Update withdrawal condition
             const minReferrals = appConfig?.minWithdrawalReferrals || 0;
@@ -1622,7 +1671,7 @@
             
             // Update referral link
             document.getElementById('referral-link-input').value = 
-                `https://t.me/YourBotUsername/SuperAirDrop?startapp=ref_${currentUser.id}`;
+                `https://t.me/Plays2Earnshubbot/SuperAirDrop?startapp=ref_${currentUser.id}`;
         }
 
         // Get today's ads watched count
@@ -1638,11 +1687,424 @@
                 lastWatch.getMonth() === today.getMonth() &&
                 lastWatch.getFullYear() === today.getFullYear()
             ) {
-                // For demo purposes, we'll return a mock value
-                return Math.min(5, appConfig?.dailyAdLimit || 20);
+                // Count today's ads from dailyEarnings
+                const todayKey = today.toISOString().split('T')[0];
+                const todayEarnings = currentUser.dailyEarnings?.[todayKey] || 0;
+                const adReward = appConfig?.dailyAdReward || 0.05;
+                return Math.min(Math.floor(todayEarnings / adReward), appConfig?.dailyAdLimit || 20);
             }
             
             return 0;
+        }
+
+        // Watch ad function - simplified without timer/popup
+        async function watchAd() {
+            if (!currentUser) return;
+            
+            const todayAds = getTodayAdsWatched();
+            const dailyLimit = appConfig?.dailyAdLimit || 20;
+            
+            if (todayAds >= dailyLimit) {
+                alert('You have reached your daily ad limit. Come back tomorrow!');
+                return;
+            }
+            
+            const adReward = appConfig?.dailyAdReward || 0.05;
+            
+            try {
+                // Show loading state
+                const watchBtn = document.getElementById('watch-ad-btn');
+                watchBtn.disabled = true;
+                watchBtn.textContent = 'Watching Ad...';
+                
+                // Simulate ad watching (in real app, this would be actual ad display)
+                setTimeout(async () => {
+                    // Update user data in Firestore
+                    await db.collection('users').doc(currentUser.id).update({
+                        earningBalance: firebase.firestore.FieldValue.increment(adReward),
+                        totalAdsWatched: firebase.firestore.FieldValue.increment(1),
+                        lastAdWatchTimestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    // Update local user data
+                    currentUser.earningBalance += adReward;
+                    currentUser.totalAdsWatched = (currentUser.totalAdsWatched || 0) + 1;
+                    currentUser.lastAdWatchTimestamp = new Date();
+                    
+                    // Update daily earnings for graph
+                    await updateDailyEarnings(adReward);
+                    
+                    // Reset button
+                    watchBtn.disabled = false;
+                    watchBtn.textContent = `Watch Ad (${adReward} AFN)`;
+                    
+                    updateUserUI();
+                    alert(`Ad watched! You earned ${adReward} AFN!`);
+                }, 2000); // 2 second simulation
+                
+            } catch (error) {
+                console.error('Error watching ad:', error);
+                alert('Error watching ad. Please try again.');
+                
+                // Reset button on error
+                const watchBtn = document.getElementById('watch-ad-btn');
+                watchBtn.disabled = false;
+                watchBtn.textContent = `Watch Ad (${adReward} AFN)`;
+            }
+        }
+
+        // Copy referral link to clipboard
+        function copyReferralLink() {
+            const referralInput = document.getElementById('referral-link-input');
+            referralInput.select();
+            document.execCommand('copy');
+            alert('Referral link copied to clipboard!');
+        }
+
+        // Open withdrawal modal
+        function openWithdrawalModal() {
+            if (!currentUser) return;
+            
+            const minReferrals = appConfig?.minWithdrawalReferrals || 0;
+            
+            if (minReferrals > 0 && currentUser.referrals < minReferrals) {
+                alert(`You need at least ${minReferrals} referrals to withdraw funds.`);
+                return;
+            }
+            
+            if (currentUser.mainBalance <= 0) {
+                alert('You have no funds to withdraw.');
+                return;
+            }
+            
+            // Populate withdrawal methods
+            const methodSelect = document.getElementById('withdrawal-method');
+            methodSelect.innerHTML = '<option value="">Select method</option>';
+            
+            if (appConfig && appConfig.withdrawalMethods) {
+                appConfig.withdrawalMethods.forEach(method => {
+                    const option = document.createElement('option');
+                    option.value = method.name;
+                    option.textContent = `${method.name} (Min: ${method.min} AFN)`;
+                    methodSelect.appendChild(option);
+                });
+            }
+            
+            // Reset form
+            document.getElementById('withdrawal-address').value = '';
+            document.getElementById('withdrawal-amount').value = '';
+            document.getElementById('withdrawal-info').innerHTML = '';
+            
+            // Update withdrawal info
+            const withdrawalInfo = document.getElementById('withdrawal-info');
+            withdrawalInfo.innerHTML = `
+                <div class="alert alert-info">
+                    <strong>Available Balance:</strong> ${currentUser.mainBalance.toFixed(2)} AFN<br>
+                    <strong>Minimum Withdrawal:</strong> 50 AFN
+                </div>
+            `;
+            
+            openModal('withdrawal-modal');
+        }
+
+        // Submit withdrawal request
+        async function submitWithdrawal() {
+            if (!currentUser) return;
+            
+            const method = document.getElementById('withdrawal-method').value;
+            const address = document.getElementById('withdrawal-address').value.trim();
+            const amount = parseFloat(document.getElementById('withdrawal-amount').value);
+            
+            if (!method) {
+                alert('Please select a withdrawal method.');
+                return;
+            }
+            
+            if (!address) {
+                alert('Please enter your wallet address.');
+                return;
+            }
+            
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid withdrawal amount.');
+                return;
+            }
+            
+            // Find selected method details
+            const selectedMethod = appConfig.withdrawalMethods.find(m => m.name === method);
+            
+            if (!selectedMethod) {
+                alert('Invalid withdrawal method.');
+                return;
+            }
+            
+            if (amount < selectedMethod.min) {
+                alert(`Minimum withdrawal amount for ${method} is ${selectedMethod.min} AFN.`);
+                return;
+            }
+            
+            if (amount > currentUser.mainBalance) {
+                alert('Insufficient balance.');
+                return;
+            }
+            
+            try {
+                // Create withdrawal request
+                const withdrawalData = {
+                    userId: currentUser.id,
+                    username: currentUser.username,
+                    firstName: currentUser.firstName,
+                    amount: amount,
+                    method: method,
+                    walletAddress: address,
+                    status: 'pending',
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                await db.collection('withdrawals').add(withdrawalData);
+                
+                // Deduct amount from user's main balance
+                await db.collection('users').doc(currentUser.id).update({
+                    mainBalance: firebase.firestore.FieldValue.increment(-amount)
+                });
+                
+                // Update local user data
+                currentUser.mainBalance -= amount;
+                
+                updateUserUI();
+                closeModal('withdrawal-modal');
+                alert('Withdrawal request submitted successfully!');
+                
+                // Reload withdrawal history
+                loadWithdrawalHistory();
+            } catch (error) {
+                console.error('Error submitting withdrawal:', error);
+                alert('Error submitting withdrawal request. Please try again.');
+            }
+        }
+
+        // Load bonus tasks for user
+        async function loadBonusTasks() {
+            try {
+                const tasksSnapshot = await db.collection('tasks').get();
+                const tasksList = document.getElementById('bonus-tasks-list');
+                tasksList.innerHTML = '';
+                
+                if (tasksSnapshot.empty) {
+                    tasksList.innerHTML = '<div class="text-center p-3">No tasks available</div>';
+                    return;
+                }
+                
+                tasksSnapshot.forEach(doc => {
+                    const task = doc.data();
+                    task.id = doc.id;
+                    
+                    const isCompleted = currentUser.completedBonusTasks && 
+                                       currentUser.completedBonusTasks.includes(task.id);
+                    
+                    const taskElement = document.createElement('div');
+                    taskElement.className = 'task-item';
+                    taskElement.innerHTML = `
+                        <div class="task-info">
+                            <h4>${task.title}</h4>
+                            <p>${task.description}</p>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="task-reward mr-2">${task.reward} AFN</span>
+                            <button class="btn ${isCompleted ? 'btn-secondary' : 'btn-primary'}" 
+                                    ${isCompleted ? 'disabled' : ''} 
+                                    data-task-id="${task.id}"
+                                    data-task-url="${task.url || '#'}">
+                                ${isCompleted ? 'Claimed' : 'Complete Task'}
+                            </button>
+                        </div>
+                    `;
+                    
+                    tasksList.appendChild(taskElement);
+                    
+                    // Add event listener for task button
+                    if (!isCompleted) {
+                        taskElement.querySelector('button').addEventListener('click', function() {
+                            const taskId = this.getAttribute('data-task-id');
+                            const taskUrl = this.getAttribute('data-task-url');
+                            completeTask(taskId, task.reward, taskUrl);
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading bonus tasks:', error);
+                document.getElementById('bonus-tasks-list').innerHTML = '<div class="text-center p-3">Error loading tasks</div>';
+            }
+        }
+
+        // Complete task - open link and add reward
+        async function completeTask(taskId, reward, taskUrl) {
+            if (!currentUser) return;
+            
+            // Open task URL in new tab
+            if (taskUrl && taskUrl !== '#') {
+                window.open(taskUrl, '_blank');
+            }
+            
+            try {
+                // Update user data in Firestore
+                await db.collection('users').doc(currentUser.id).update({
+                    earningBalance: firebase.firestore.FieldValue.increment(reward),
+                    completedBonusTasks: firebase.firestore.FieldValue.arrayUnion(taskId)
+                });
+                
+                // Update local user data
+                currentUser.earningBalance += reward;
+                if (!currentUser.completedBonusTasks) {
+                    currentUser.completedBonusTasks = [];
+                }
+                currentUser.completedBonusTasks.push(taskId);
+                
+                // Update daily earnings for graph
+                await updateDailyEarnings(reward);
+                
+                updateUserUI();
+                loadBonusTasks(); // Reload tasks to update UI
+                alert(`Task completed! You earned ${reward} AFN!`);
+            } catch (error) {
+                console.error('Error completing task:', error);
+                alert('Error completing task. Please try again.');
+            }
+        }
+
+        // Load leaderboard data - FIXED
+        async function loadLeaderboard() {
+            try {
+                // Load top referrers
+                const referrersSnapshot = await db.collection('users')
+                    .where('referrals', '>', 0)
+                    .orderBy('referrals', 'desc')
+                    .limit(50)
+                    .get();
+                
+                const referrersList = document.getElementById('referrers-list');
+                
+                if (referrersSnapshot.empty) {
+                    referrersList.innerHTML = '<div class="text-center p-3">No referrers yet</div>';
+                } else {
+                    referrersList.innerHTML = '';
+                    let rank = 1;
+                    
+                    referrersSnapshot.forEach(doc => {
+                        const user = doc.data();
+                        if (user.firstName || user.username) {
+                            const listItem = createLeaderboardItem(rank, user, user.referrals || 0, 'referrals');
+                            referrersList.appendChild(listItem);
+                            rank++;
+                        }
+                    });
+                }
+                
+                // Load top earners
+                const earnersSnapshot = await db.collection('users')
+                    .where('mainBalance', '>', 0)
+                    .orderBy('mainBalance', 'desc')
+                    .limit(50)
+                    .get();
+                
+                const earnersList = document.getElementById('earners-list');
+                
+                if (earnersSnapshot.empty) {
+                    earnersList.innerHTML = '<div class="text-center p-3">No earners yet</div>';
+                } else {
+                    earnersList.innerHTML = '';
+                    let rank = 1;
+                    
+                    earnersSnapshot.forEach(doc => {
+                        const user = doc.data();
+                        if (user.firstName || user.username) {
+                            const listItem = createLeaderboardItem(rank, user, user.mainBalance || 0, 'AFN');
+                            earnersList.appendChild(listItem);
+                            rank++;
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading leaderboard:', error);
+                document.getElementById('referrers-list').innerHTML = '<div class="text-center p-3">Error loading leaderboard</div>';
+                document.getElementById('earners-list').innerHTML = '<div class="text-center p-3">Error loading leaderboard</div>';
+            }
+        }
+
+        // Create leaderboard list item
+        function createLeaderboardItem(rank, user, score, unit) {
+            const listItem = document.createElement('div');
+            listItem.className = 'leaderboard-item';
+            
+            listItem.innerHTML = `
+                <div class="leaderboard-rank">#${rank}</div>
+                <div class="leaderboard-user">
+                    <div class="leaderboard-avatar">
+                        <i>👤</i>
+                    </div>
+                    <div class="leaderboard-details">
+                        <h4>${user.firstName || 'User'}</h4>
+                        <p>@${user.username || 'user'}</p>
+                    </div>
+                </div>
+                <div class="leaderboard-score">${score} ${unit}</div>
+            `;
+            
+            return listItem;
+        }
+
+        // Load withdrawal history for user
+        async function loadWithdrawalHistory() {
+            if (!currentUser) return;
+            
+            try {
+                const withdrawalsSnapshot = await db.collection('withdrawals')
+                    .where('userId', '==', currentUser.id)
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                const historyContainer = document.getElementById('withdrawal-history');
+                
+                if (withdrawalsSnapshot.empty) {
+                    historyContainer.innerHTML = '<div class="text-center p-3">No withdrawal history</div>';
+                    return;
+                }
+                
+                historyContainer.innerHTML = '';
+                
+                withdrawalsSnapshot.forEach(doc => {
+                    const withdrawal = doc.data();
+                    const listItem = document.createElement('div');
+                    listItem.className = 'withdrawal-item';
+                    
+                    const date = withdrawal.createdAt ? 
+                        withdrawal.createdAt.toDate().toLocaleDateString() : 'N/A';
+                    
+                    let statusBadge = '';
+                    if (withdrawal.status === 'pending') {
+                        statusBadge = '<span class="badge badge-warning">Pending</span>';
+                    } else if (withdrawal.status === 'approved') {
+                        statusBadge = '<span class="badge badge-success">Approved</span>';
+                    } else if (withdrawal.status === 'rejected') {
+                        statusBadge = '<span class="badge badge-danger">Rejected</span>';
+                    }
+                    
+                    listItem.innerHTML = `
+                        <div class="withdrawal-info">
+                            <h4>${withdrawal.amount} AFN</h4>
+                            <p>${withdrawal.method} • ${date}</p>
+                        </div>
+                        <div>
+                            ${statusBadge}
+                        </div>
+                    `;
+                    
+                    historyContainer.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error('Error loading withdrawal history:', error);
+                document.getElementById('withdrawal-history').innerHTML = '<div class="text-center p-3">Error loading history</div>';
+            }
         }
 
         // Switch between user screens
@@ -1682,7 +2144,7 @@
             document.getElementById(tabId).classList.add('active');
         }
 
-        // Switch between admin tabs
+        // Switch between admin tabs - FIXED
         function switchAdminTab(tabId) {
             // Update active nav item
             document.querySelectorAll('.admin-nav-item').forEach(item => {
@@ -1740,8 +2202,8 @@
                         minTransferAmount: 10,
                         minWithdrawalReferrals: 0,
                         withdrawalMethods: [
-                            { name: "USDT (BEP-20)", min: 50 },
-                            { name: "USDT (TRC-20)", min: 50 }
+                            { name: "Bank Transfer", min: 50 },
+                            { name: "Cash", min: 50 }
                         ]
                     };
                     
@@ -1800,7 +2262,7 @@
             const minTransfer = appConfig?.minTransferAmount || 10;
             
             if (currentUser.earningBalance < minTransfer) {
-                alert(`You need at least ${minTransfer} USDT to transfer.`);
+                alert(`You need at least ${minTransfer} AFN to transfer.`);
                 return;
             }
             
@@ -1820,445 +2282,6 @@
             } catch (error) {
                 console.error('Error transferring funds:', error);
                 alert('Error transferring funds. Please try again.');
-            }
-        }
-
-        // Open ad watch modal
-        function openAdModal() {
-            const todayAds = getTodayAdsWatched();
-            const dailyLimit = appConfig?.dailyAdLimit || 20;
-            
-            if (todayAds >= dailyLimit) {
-                alert('You have reached your daily ad limit. Come back tomorrow!');
-                return;
-            }
-            
-            openModal('ad-modal');
-            
-            // Display ad
-            displayAdInModal();
-            
-            // Start countdown and auto-claim
-            startAdCountdown();
-        }
-
-        // Display ad in modal
-        function displayAdInModal() {
-            const adContainer = document.getElementById('ad-display');
-            adContainer.innerHTML = '';
-            
-            // Create ad element
-            const adElement = document.createElement('div');
-            adElement.className = 'ad-unit';
-            adElement.style.width = '100%';
-            adElement.style.height = '200px';
-            adElement.style.background = 'linear-gradient(45deg, #f0f0f0, #e0e0e0)';
-            adElement.style.display = 'flex';
-            adElement.style.alignItems = 'center';
-            adElement.style.justifyContent = 'center';
-            adElement.style.borderRadius = '8px';
-            adElement.innerHTML = '<p>Advertisement Content</p>';
-            
-            adContainer.appendChild(adElement);
-            
-            // If ad script is available, use it
-            if (window.show_10001644) {
-                try {
-                    window.show_10001644(adElement);
-                } catch (error) {
-                    console.error('Error displaying ad:', error);
-                    adElement.innerHTML = '<p>Advertisement - Watch for 15 seconds</p>';
-                }
-            }
-        }
-
-        // Start ad countdown and auto-claim
-        function startAdCountdown() {
-            const countdownBar = document.querySelector('.ad-countdown');
-            const claimBtn = document.getElementById('claim-ad-reward-btn');
-            
-            // Reset countdown
-            countdownBar.style.animation = 'none';
-            claimBtn.disabled = true;
-            
-            // Start countdown
-            setTimeout(() => {
-                countdownBar.style.animation = 'countdown 15s linear forwards';
-                
-                // Auto-claim after 15 seconds
-                adTimer = setTimeout(() => {
-                    claimAdReward();
-                }, 15000);
-                
-            }, 100);
-        }
-
-        // Claim ad reward
-        async function claimAdReward() {
-            if (!currentUser) return;
-            
-            const adReward = appConfig?.dailyAdReward || 0.05;
-            
-            try {
-                // Clear timer
-                if (adTimer) {
-                    clearTimeout(adTimer);
-                    adTimer = null;
-                }
-                
-                // Update user data in Firestore
-                await db.collection('users').doc(currentUser.id).update({
-                    earningBalance: firebase.firestore.FieldValue.increment(adReward),
-                    totalAdsWatched: firebase.firestore.FieldValue.increment(1),
-                    lastAdWatchTimestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                // Update local user data
-                currentUser.earningBalance += adReward;
-                currentUser.totalAdsWatched = (currentUser.totalAdsWatched || 0) + 1;
-                currentUser.lastAdWatchTimestamp = new Date();
-                
-                // Update daily earnings for graph
-                await updateDailyEarnings(adReward);
-                
-                updateUserUI();
-                closeModal('ad-modal');
-                alert(`You earned ${adReward} USDT!`);
-            } catch (error) {
-                console.error('Error claiming ad reward:', error);
-                alert('Error claiming reward. Please try again.');
-            }
-        }
-
-        // Copy referral link to clipboard
-        function copyReferralLink() {
-            const referralInput = document.getElementById('referral-link-input');
-            referralInput.select();
-            document.execCommand('copy');
-            alert('Referral link copied to clipboard!');
-        }
-
-        // Open withdrawal modal
-        function openWithdrawalModal() {
-            if (!currentUser) return;
-            
-            const minReferrals = appConfig?.minWithdrawalReferrals || 0;
-            
-            if (minReferrals > 0 && currentUser.referrals < minReferrals) {
-                alert(`You need at least ${minReferrals} referrals to withdraw funds.`);
-                return;
-            }
-            
-            if (currentUser.mainBalance <= 0) {
-                alert('You have no funds to withdraw.');
-                return;
-            }
-            
-            // Populate withdrawal methods
-            const methodSelect = document.getElementById('withdrawal-method');
-            methodSelect.innerHTML = '<option value="">Select method</option>';
-            
-            if (appConfig && appConfig.withdrawalMethods) {
-                appConfig.withdrawalMethods.forEach(method => {
-                    const option = document.createElement('option');
-                    option.value = method.name;
-                    option.textContent = `${method.name} (Min: ${method.min} USDT)`;
-                    methodSelect.appendChild(option);
-                });
-            }
-            
-            // Reset form
-            document.getElementById('withdrawal-address').value = '';
-            document.getElementById('withdrawal-amount').value = '';
-            document.getElementById('withdrawal-info').innerHTML = '';
-            
-            // Update withdrawal info
-            const withdrawalInfo = document.getElementById('withdrawal-info');
-            withdrawalInfo.innerHTML = `
-                <div class="alert alert-info">
-                    <strong>Available Balance:</strong> ${currentUser.mainBalance.toFixed(2)} USDT<br>
-                    <strong>Minimum Withdrawal:</strong> 50 USDT
-                </div>
-            `;
-            
-            openModal('withdrawal-modal');
-        }
-
-        // Submit withdrawal request
-        async function submitWithdrawal() {
-            if (!currentUser) return;
-            
-            const method = document.getElementById('withdrawal-method').value;
-            const address = document.getElementById('withdrawal-address').value.trim();
-            const amount = parseFloat(document.getElementById('withdrawal-amount').value);
-            
-            if (!method) {
-                alert('Please select a withdrawal method.');
-                return;
-            }
-            
-            if (!address) {
-                alert('Please enter your wallet address.');
-                return;
-            }
-            
-            if (!amount || amount <= 0) {
-                alert('Please enter a valid withdrawal amount.');
-                return;
-            }
-            
-            // Find selected method details
-            const selectedMethod = appConfig.withdrawalMethods.find(m => m.name === method);
-            
-            if (!selectedMethod) {
-                alert('Invalid withdrawal method.');
-                return;
-            }
-            
-            if (amount < selectedMethod.min) {
-                alert(`Minimum withdrawal amount for ${method} is ${selectedMethod.min} USDT.`);
-                return;
-            }
-            
-            if (amount > currentUser.mainBalance) {
-                alert('Insufficient balance.');
-                return;
-            }
-            
-            try {
-                // Create withdrawal request
-                const withdrawalData = {
-                    userId: currentUser.id,
-                    username: currentUser.username,
-                    firstName: currentUser.firstName,
-                    amount: amount,
-                    method: method,
-                    walletAddress: address,
-                    status: 'pending',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
-                
-                await db.collection('withdrawals').add(withdrawalData);
-                
-                // Deduct amount from user's main balance
-                await db.collection('users').doc(currentUser.id).update({
-                    mainBalance: firebase.firestore.FieldValue.increment(-amount)
-                });
-                
-                // Update local user data
-                currentUser.mainBalance -= amount;
-                
-                updateUserUI();
-                closeModal('withdrawal-modal');
-                alert('Withdrawal request submitted successfully!');
-                
-                // Reload withdrawal history
-                loadWithdrawalHistory();
-            } catch (error) {
-                console.error('Error submitting withdrawal:', error);
-                alert('Error submitting withdrawal request. Please try again.');
-            }
-        }
-
-        // Load bonus tasks for user
-        async function loadBonusTasks() {
-            try {
-                const tasksSnapshot = await db.collection('tasks').get();
-                const tasksList = document.getElementById('bonus-tasks-list');
-                tasksList.innerHTML = '';
-                
-                tasksSnapshot.forEach(doc => {
-                    const task = doc.data();
-                    task.id = doc.id;
-                    
-                    const isCompleted = currentUser.completedBonusTasks && 
-                                       currentUser.completedBonusTasks.includes(task.id);
-                    
-                    const taskElement = document.createElement('div');
-                    taskElement.className = 'task-item';
-                    taskElement.innerHTML = `
-                        <div class="task-info">
-                            <h4>${task.title}</h4>
-                            <p>${task.description}</p>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <span class="task-reward mr-2">${task.reward} USDT</span>
-                            <button class="btn ${isCompleted ? 'btn-secondary' : 'btn-primary'}" 
-                                    ${isCompleted ? 'disabled' : ''} 
-                                    data-task-id="${task.id}"
-                                    data-task-url="${task.url || '#'}">
-                                ${isCompleted ? 'Claimed' : 'Complete Task'}
-                            </button>
-                        </div>
-                    `;
-                    
-                    tasksList.appendChild(taskElement);
-                    
-                    // Add event listener for task button
-                    if (!isCompleted) {
-                        taskElement.querySelector('button').addEventListener('click', function() {
-                            const taskId = this.getAttribute('data-task-id');
-                            const taskUrl = this.getAttribute('data-task-url');
-                            completeTask(taskId, task.reward, taskUrl);
-                        });
-                    }
-                });
-            } catch (error) {
-                console.error('Error loading bonus tasks:', error);
-            }
-        }
-
-        // Complete task - open link and add reward
-        async function completeTask(taskId, reward, taskUrl) {
-            if (!currentUser) return;
-            
-            // Open task URL in new tab
-            if (taskUrl && taskUrl !== '#') {
-                window.open(taskUrl, '_blank');
-            }
-            
-            try {
-                // Update user data in Firestore
-                await db.collection('users').doc(currentUser.id).update({
-                    earningBalance: firebase.firestore.FieldValue.increment(reward),
-                    completedBonusTasks: firebase.firestore.FieldValue.arrayUnion(taskId)
-                });
-                
-                // Update local user data
-                currentUser.earningBalance += reward;
-                if (!currentUser.completedBonusTasks) {
-                    currentUser.completedBonusTasks = [];
-                }
-                currentUser.completedBonusTasks.push(taskId);
-                
-                // Update daily earnings for graph
-                await updateDailyEarnings(reward);
-                
-                updateUserUI();
-                loadBonusTasks(); // Reload tasks to update UI
-                alert(`Task completed! You earned ${reward} USDT!`);
-            } catch (error) {
-                console.error('Error completing task:', error);
-                alert('Error completing task. Please try again.');
-            }
-        }
-
-        // Load leaderboard data - FIXED: Show real users
-        async function loadLeaderboard() {
-            try {
-                // Load top referrers - REAL USERS
-                const referrersSnapshot = await db.collection('users')
-                    .orderBy('referrals', 'desc')
-                    .limit(50)
-                    .get();
-                
-                const referrersList = document.getElementById('referrers-list');
-                referrersList.innerHTML = '';
-                
-                let rank = 1;
-                referrersSnapshot.forEach(doc => {
-                    const user = doc.data();
-                    if (user.firstName || user.username) { // Only show real users
-                        const listItem = createLeaderboardItem(rank, user, user.referrals || 0, 'referrals');
-                        referrersList.appendChild(listItem);
-                        rank++;
-                    }
-                });
-                
-                // Load top earners - REAL USERS
-                const earnersSnapshot = await db.collection('users')
-                    .orderBy('mainBalance', 'desc')
-                    .limit(50)
-                    .get();
-                
-                const earnersList = document.getElementById('earners-list');
-                earnersList.innerHTML = '';
-                
-                rank = 1;
-                earnersSnapshot.forEach(doc => {
-                    const user = doc.data();
-                    if (user.firstName || user.username) { // Only show real users
-                        const listItem = createLeaderboardItem(rank, user, user.mainBalance || 0, 'USDT');
-                        earnersList.appendChild(listItem);
-                        rank++;
-                    }
-                });
-            } catch (error) {
-                console.error('Error loading leaderboard:', error);
-            }
-        }
-
-        // Create leaderboard list item
-        function createLeaderboardItem(rank, user, score, unit) {
-            const listItem = document.createElement('div');
-            listItem.className = 'leaderboard-item';
-            
-            listItem.innerHTML = `
-                <div class="leaderboard-rank">#${rank}</div>
-                <div class="leaderboard-user">
-                    <div class="leaderboard-avatar">
-                        <i>👤</i>
-                    </div>
-                    <div class="leaderboard-details">
-                        <h4>${user.firstName || 'User'}</h4>
-                        <p>@${user.username || 'user'}</p>
-                    </div>
-                </div>
-                <div class="leaderboard-score">${score} ${unit}</div>
-            `;
-            
-            return listItem;
-        }
-
-        // Load withdrawal history for user
-        async function loadWithdrawalHistory() {
-            if (!currentUser) return;
-            
-            try {
-                const withdrawalsSnapshot = await db.collection('withdrawals')
-                    .where('userId', '==', currentUser.id)
-                    .orderBy('createdAt', 'desc')
-                    .get();
-                
-                const historyContainer = document.getElementById('withdrawal-history');
-                historyContainer.innerHTML = '';
-                
-                if (withdrawalsSnapshot.empty) {
-                    historyContainer.innerHTML = '<p class="text-center">No withdrawal history</p>';
-                    return;
-                }
-                
-                withdrawalsSnapshot.forEach(doc => {
-                    const withdrawal = doc.data();
-                    const listItem = document.createElement('div');
-                    listItem.className = 'withdrawal-item';
-                    
-                    const date = withdrawal.createdAt ? 
-                        withdrawal.createdAt.toDate().toLocaleDateString() : 'N/A';
-                    
-                    let statusBadge = '';
-                    if (withdrawal.status === 'pending') {
-                        statusBadge = '<span class="badge badge-warning">Pending</span>';
-                    } else if (withdrawal.status === 'approved') {
-                        statusBadge = '<span class="badge badge-success">Approved</span>';
-                    } else if (withdrawal.status === 'rejected') {
-                        statusBadge = '<span class="badge badge-danger">Rejected</span>';
-                    }
-                    
-                    listItem.innerHTML = `
-                        <div class="withdrawal-info">
-                            <h4>${withdrawal.amount} USDT</h4>
-                            <p>${withdrawal.method} • ${date}</p>
-                        </div>
-                        <div>
-                            ${statusBadge}
-                        </div>
-                    `;
-                    
-                    historyContainer.appendChild(listItem);
-                });
-            } catch (error) {
-                console.error('Error loading withdrawal history:', error);
             }
         }
 
@@ -2312,13 +2335,13 @@
                 const usersSnapshot = await db.collection('users').get();
                 document.getElementById('admin-total-users').textContent = usersSnapshot.size;
                 
-                // Calculate total USDT earned
+                // Calculate total AFN earned
                 let totalEarned = 0;
                 usersSnapshot.forEach(doc => {
                     const user = doc.data();
                     totalEarned += (user.mainBalance || 0) + (user.earningBalance || 0);
                 });
-                document.getElementById('admin-total-earned').textContent = `${totalEarned.toFixed(2)} USDT`;
+                document.getElementById('admin-total-earned').textContent = `${totalEarned.toFixed(2)} AFN`;
                 
                 // Get pending withdrawals count
                 const pendingWithdrawalsSnapshot = await db.collection('withdrawals')
@@ -2336,11 +2359,17 @@
             }
         }
 
-        // Load users table for admin
+        // Load users table for admin - FIXED
         async function loadUsersTable() {
             try {
                 const usersSnapshot = await db.collection('users').get();
                 const tableBody = document.getElementById('users-table-body');
+                
+                if (usersSnapshot.empty) {
+                    tableBody.innerHTML = '<tr><td colspan="8" class="text-center">No users found</td></tr>';
+                    return;
+                }
+                
                 tableBody.innerHTML = '';
                 
                 usersSnapshot.forEach(doc => {
@@ -2354,8 +2383,9 @@
                     row.innerHTML = `
                         <td>${user.id}</td>
                         <td>${user.username || 'N/A'}</td>
-                        <td>${user.mainBalance ? user.mainBalance.toFixed(2) : '0.00'} USDT</td>
-                        <td>${user.earningBalance ? user.earningBalance.toFixed(2) : '0.00'} USDT</td>
+                        <td>${user.firstName || 'N/A'}</td>
+                        <td>${user.mainBalance ? user.mainBalance.toFixed(2) : '0.00'} AFN</td>
+                        <td>${user.earningBalance ? user.earningBalance.toFixed(2) : '0.00'} AFN</td>
                         <td>${user.referrals || 0}</td>
                         <td>${joinDate}</td>
                         <td>
@@ -2375,10 +2405,11 @@
                 });
             } catch (error) {
                 console.error('Error loading users table:', error);
+                document.getElementById('users-table-body').innerHTML = '<tr><td colspan="8" class="text-center">Error loading users</td></tr>';
             }
         }
 
-        // Open user edit modal
+        // Open user edit modal - FIXED
         async function openUserEditModal(userId) {
             try {
                 const userDoc = await db.collection('users').doc(userId).get();
@@ -2392,6 +2423,7 @@
                 
                 document.getElementById('edit-user-id').value = userId;
                 document.getElementById('edit-username').value = user.username || '';
+                document.getElementById('edit-first-name').value = user.firstName || '';
                 document.getElementById('edit-main-balance').value = user.mainBalance || 0;
                 document.getElementById('edit-earning-balance').value = user.earningBalance || 0;
                 document.getElementById('edit-referrals').value = user.referrals || 0;
@@ -2407,6 +2439,7 @@
         async function saveUserEdits() {
             const userId = document.getElementById('edit-user-id').value;
             const username = document.getElementById('edit-username').value;
+            const firstName = document.getElementById('edit-first-name').value;
             const mainBalance = parseFloat(document.getElementById('edit-main-balance').value);
             const earningBalance = parseFloat(document.getElementById('edit-earning-balance').value);
             const referrals = parseInt(document.getElementById('edit-referrals').value);
@@ -2414,6 +2447,7 @@
             try {
                 await db.collection('users').doc(userId).update({
                     username: username,
+                    firstName: firstName,
                     mainBalance: mainBalance,
                     earningBalance: earningBalance,
                     referrals: referrals
@@ -2433,6 +2467,12 @@
             try {
                 const tasksSnapshot = await db.collection('tasks').get();
                 const tableBody = document.getElementById('tasks-table-body');
+                
+                if (tasksSnapshot.empty) {
+                    tableBody.innerHTML = '<tr><td colspan="5" class="text-center">No tasks found</td></tr>';
+                    return;
+                }
+                
                 tableBody.innerHTML = '';
                 
                 tasksSnapshot.forEach(doc => {
@@ -2443,7 +2483,8 @@
                     row.innerHTML = `
                         <td>${task.title}</td>
                         <td>${task.description}</td>
-                        <td>${task.reward} USDT</td>
+                        <td>${task.reward} AFN</td>
+                        <td>${task.url || 'N/A'}</td>
                         <td>
                             <button class="btn btn-sm btn-danger delete-task-btn" data-task-id="${task.id}">Delete</button>
                         </td>
@@ -2463,6 +2504,7 @@
                 });
             } catch (error) {
                 console.error('Error loading tasks table:', error);
+                document.getElementById('tasks-table-body').innerHTML = '<tr><td colspan="5" class="text-center">Error loading tasks</td></tr>';
             }
         }
 
@@ -2512,7 +2554,7 @@
             }
         }
 
-        // Load withdrawals table for admin
+        // Load withdrawals table for admin - FIXED
         async function loadWithdrawalsTable() {
             try {
                 const withdrawalsSnapshot = await db.collection('withdrawals')
@@ -2521,14 +2563,13 @@
                     .get();
                 
                 const tableBody = document.getElementById('withdrawals-table-body');
-                tableBody.innerHTML = '';
                 
                 if (withdrawalsSnapshot.empty) {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `<td colspan="6" class="text-center">No pending withdrawals</td>`;
-                    tableBody.appendChild(row);
+                    tableBody.innerHTML = '<tr><td colspan="8" class="text-center">No pending withdrawals</td></tr>';
                     return;
                 }
+                
+                tableBody.innerHTML = '';
                 
                 withdrawalsSnapshot.forEach(doc => {
                     const withdrawal = doc.data();
@@ -2540,8 +2581,10 @@
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td>${date}</td>
-                        <td>${withdrawal.username || withdrawal.firstName || 'User'}</td>
-                        <td>${withdrawal.amount} USDT</td>
+                        <td>${withdrawal.userId}</td>
+                        <td>${withdrawal.username || 'N/A'}</td>
+                        <td>${withdrawal.firstName || 'N/A'}</td>
+                        <td>${withdrawal.amount} AFN</td>
                         <td>${withdrawal.walletAddress}</td>
                         <td>${withdrawal.method}</td>
                         <td>
@@ -2569,6 +2612,7 @@
                 });
             } catch (error) {
                 console.error('Error loading withdrawals table:', error);
+                document.getElementById('withdrawals-table-body').innerHTML = '<tr><td colspan="8" class="text-center">Error loading withdrawals</td></tr>';
             }
         }
 
